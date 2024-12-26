@@ -16,13 +16,6 @@ from .forms import ProfileUpdateForm, PostCreateForm, CommentForm
 NUM_POST = 10
 
 
-class OnlyAuthorMixin(UserPassesTestMixin):
-
-    def test_func(self):
-        object = self.get_object()
-        return object.author == self.request.user
-
-
 class PostFilterMixin:
     def get_posts(self, category=None):
         filters = {
@@ -41,7 +34,11 @@ class PostListView(PostFilterMixin, ListView):
     paginate_by = NUM_POST
 
     def get_queryset(self):
-        return self.get_posts().annotate(comment_count=Count('comments')).order_by('-created_at')
+        queryset = self.get_posts() \
+            .select_related('author', 'location', 'category') \
+            .annotate(comment_count=Count('comments')) \
+            .order_by('-created_at')
+        return queryset
 
 
 class CategoryPostsView(PostFilterMixin, ListView):
@@ -153,8 +150,8 @@ class ProfileView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         username = self.kwargs.get('username')
-        user = get_object_or_404(User, username=username)
-        return Post.objects.filter(author=user).annotate(comment_count=Count('comments')).order_by('-created_at')
+        user = get_object_or_404(User.objects.select_related(), username=username)
+        return Post.objects.filter(author=user).annotate(comment_count=Count('comments')).select_related('author', 'location', 'category').order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -164,29 +161,19 @@ class ProfileView(LoginRequiredMixin, ListView):
         return context
 
 
-class ProfileUpdateView(UserPassesTestMixin, UpdateView):
+class ProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = User
     form_class = ProfileUpdateForm
-    template_name = 'blog/edit_profile.html'
-
-    def get_object(self):
-        username = self.kwargs.get('username')
-        return get_object_or_404(User, username=username)
-
-    def test_func(self):
-        user = self.get_object()
-        return self.request.user == user
-
-    def form_valid(self, form):
-        return super().form_valid(form)
+    template_name = 'blog/user.html'
 
     def get_success_url(self):
-        return reverse('blog:profile', kwargs={'username': self.object.username})
+        return reverse_lazy(
+            'blog:profile',
+            kwargs={'username': self.object.username}
+        )
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['user'] = self.get_object()
-        return context
+    def get_object(self):
+        return self.request.user
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
