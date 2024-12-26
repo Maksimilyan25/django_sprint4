@@ -14,13 +14,19 @@ SECRET_KEY = 'django-insecure-s))x5dr!=_(+6cgh2r#%kzvip6ikf^r$qn^hc3pwqp&vl$(eh_
 DEBUG = True
 
 LOGIN_URL = 'login'
+
 LOGIN_REDIRECT_URL = 'blog:index'
+
 LOGOUT_REDIRECT_URL = 'blog:index'
+
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
 EMAIL_FILE_PATH = BASE_DIR / 'sent_emails'
+
 MEDIA_ROOT = BASE_DIR / 'media'
+
 INTERNAL_IPS = [
-'127.0.0.1',
+    '127.0.0.1',
 ]
 CSRF_FAILURE_VIEW = 'pages.views.csrf_failure'
 

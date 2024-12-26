@@ -55,7 +55,11 @@ class Post(PublishedModel, CreatedModel):
         blank=True,
         verbose_name='Местоположение'
     )
-    image = models.ImageField('Фото', upload_to='posts_images', null=True, blank=True)
+    image = models.ImageField(
+        'Фото',
+        upload_to='posts_images',
+        null=True,
+        blank=True)
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
