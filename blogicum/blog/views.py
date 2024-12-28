@@ -179,24 +179,21 @@ class ProfileUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class CommentCreateView(LoginRequiredMixin, CreateView):
-    comments = None
     model = Comment
     form_class = CommentForm
-    template_name = 'blog/create.html'
-
-    def dispatch(self, request, *args, **kwargs):
-        self.comments = get_object_or_404(Post, id=self.kwargs['post_id'])
-        return super().dispatch(request, *args, **kwargs)
-
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        form.instance.post = self.comments
-        return super().form_valid(form)
 
     def get_success_url(self):
+        post_id = self.kwargs.get('post_id')
         return reverse(
             'blog:post_detail',
-            kwargs={'post_id': self.comments.id})
+            kwargs={'post_id': post_id})
+
+    def form_valid(self, form):
+        post_id = self.kwargs.get('post_id')
+        post = get_object_or_404(Post, id=post_id)
+        form.instance.post = post
+        form.instance.author = self.request.user
+        return super().form_valid(form)
 
 
 class CommentMixin(LoginRequiredMixin):
@@ -216,7 +213,7 @@ class CommentUpdateView(CommentMixin, UpdateView):
     form_class = CommentForm
     success_url = reverse_lazy('blog:index')
 
-    def get_object(self, queryset=None):
+    def get_object(self):
         comment_id = self.kwargs.get('comment_id')
         return get_object_or_404(Comment, id=comment_id)
 
