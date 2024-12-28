@@ -46,25 +46,29 @@ class Post(PublishedModel, CreatedModel):
         User,
         on_delete=models.CASCADE,
         verbose_name='Автор публикации',
-        null=True
+        null=True,
+        related_name='posts'
     )
     location = models.ForeignKey(
         Location,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name='Местоположение'
+        verbose_name='Местоположение',
+        related_name='posts'
     )
     image = models.ImageField(
         'Фото',
         upload_to='posts_images',
         null=True,
-        blank=True)
+        blank=True
+    )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         null=True,
-        verbose_name='Категория'
+        verbose_name='Категория',
+        related_name='posts'
     )
     title = models.CharField(
         max_length=CHARNUM,
@@ -92,8 +96,12 @@ class Post(PublishedModel, CreatedModel):
 class Comment(models.Model):
     post = models.ForeignKey(
         Post, on_delete=models.CASCADE,
-        related_name='comments')
-    author = models.ForeignKey(User, on_delete=models.CASCADE)
+        related_name='comments'
+    )
+    author = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+        related_name='comments'
+    )
     text = models.TextField('Текст')
     created_at = models.DateTimeField(auto_now_add=True)
 
