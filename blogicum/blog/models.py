@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 
 from core.models import PublishedModel, CreatedModel
 
+
 User = get_user_model()
 
 CHARNUM = 256
