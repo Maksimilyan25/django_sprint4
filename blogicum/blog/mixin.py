@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils import timezone
-from django.shortcuts import redirect
+from django.core.exceptions import PermissionDenied
 
 from .models import Comment, Post
 
@@ -10,8 +10,11 @@ class CommentMixin(LoginRequiredMixin):
     template_name = 'blog/comment.html'
 
     def dispatch(self, request, *args, **kwargs):
-        if self.get_object().author != request.user:
-            return redirect('blog:post_detail', post_id=kwargs['post_id'])
+        self.object = self.get_object()
+        if self.object.author != request.user:
+            raise PermissionDenied(
+                'Вы не авторизованы для удаления этого комментария.'
+            )
         return super().dispatch(request, *args, **kwargs)
 
 

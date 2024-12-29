@@ -62,12 +62,13 @@ class PostDetailView(PostModelMixin, DetailView):
         )
 
     def get_object(self, queryset=None):
-        post_id = self.kwargs.get(self.pk_url_kwarg)
-        post = get_object_or_404(self.get_queryset(), id=post_id)
-        if not (post.author == self.request.user
-                or (post.is_published and post.category.is_published)):
-            raise Http404('Пост не найден')
-        return post
+        post_id = self.kwargs.get('post_id')
+        post = get_object_or_404(Post, id=post_id)
+        if (post.author == self.request.user or (post.is_published
+           and post.category.is_published)):
+
+            return post
+        raise Http404('Страница не найдена')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
